@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roland</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* ---------- Tokens (dark first, light overrides below) ---------- */
+:root{
+  --bg:#06151a; --text:#e6f6f4; --muted:#8fb3b0;
+  --glass:rgba(10,32,38,.52); --edge:rgba(160,255,240,.18); --hi:rgba(255,255,255,.14);
+  --glow:#3ee6d0; --glow-soft:rgba(62,230,208,.42);
+  --blob1:rgba(62,230,208,.20); --blob2:rgba(70,120,255,.16);
+  --r:20px; color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#e8f3f1; --text:#0b2a2e; --muted:#45706f;
+  --glass:rgba(255,255,255,.62); --edge:rgba(15,120,110,.28); --hi:rgba(255,255,255,.9);
+  --glow:#0f9d8f; --glow-soft:rgba(15,157,143,.28);
+  --blob1:rgba(62,230,208,.35); --blob2:rgba(120,170,255,.28);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);
+  font:400 1rem/1.5 "Bricolage Grotesque",system-ui,sans-serif;transition:background .3s,color .3s}
+/* Soft light behind the glass, so the blur has something to refract */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(60vmax 60vmax at 10% 0%,var(--blob1),transparent 60%),
+             radial-gradient(50vmax 50vmax at 100% 100%,var(--blob2),transparent 60%)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--glow);outline-offset:3px}
+
+/* ---------- Glass base ---------- */
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:var(--r);
+  box-shadow:inset 0 1px 0 var(--hi);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%)}
+
+/* ---------- Layout: mobile first ---------- */
+.top{display:flex;justify-content:flex-end;padding:12px 16px;position:relative;max-width:1200px;margin:0 auto}
+.wrap{display:grid;gap:16px;padding:0 16px 40px;max-width:1200px;margin:0 auto}
+
+/* Settings dropdown */
+.set-btn{font:inherit;color:inherit;cursor:pointer;padding:8px 14px;border-radius:999px}
+.set-pop{position:absolute;right:16px;top:56px;z-index:10;padding:14px;display:grid;gap:12px;min-width:200px}
+.set-pop[hidden]{display:none}
+.set-pop p{margin:0 0 6px;font-size:.85rem;color:var(--muted)}
+.seg{display:flex;gap:6px}
+.seg button,.tab,.soc a{font:inherit;color:inherit;cursor:pointer;background:transparent;
+  border:1px solid var(--edge);border-radius:999px;padding:7px 14px;text-decoration:none;
+  transition:box-shadow .25s,border-color .25s}
+.seg button[aria-pressed="true"],.tab[aria-selected="true"]{border-color:var(--glow);box-shadow:0 0 14px var(--glow-soft)}
+.seg button:hover,.tab:hover,.soc a:hover{border-color:var(--glow);box-shadow:0 0 14px var(--glow-soft)}
+
+/* Profile */
+.profile{padding:22px;text-align:center}
+.avatar{width:104px;height:104px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;
+  font-size:2.6rem;font-weight:800;color:#06151a;border:2px solid var(--glow);
+  background:radial-gradient(circle at 30% 25%,#9ff7ea,#3ee6d0 55%,#1b8f93);
+  box-shadow:0 0 22px var(--glow-soft);background-size:cover;background-position:center}
+.profile h1{margin:0;font-size:1.7rem;font-weight:800;letter-spacing:-.01em}
+.profile .bio{margin:8px auto 16px;color:var(--muted);max-width:34ch}
+.soc{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.soc a{font-size:.92rem}
+
+/* Menu + news */
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x proximity;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;scroll-snap-align:start;flex:0 0 auto}
+.head{display:flex;align-items:baseline;justify-content:space-between;margin:6px 2px 10px}
+.head h2{margin:0;font-size:1.25rem;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.empty{grid-column:1/-1;padding:28px;text-align:center;color:var(--muted)}
+
+/* Acrylic tile */
+.tile{position:relative;display:flex;align-items:flex-end;min-height:170px;aspect-ratio:1;
+  border-radius:var(--r);overflow:hidden;text-decoration:none;color:var(--text);
+  background:var(--img) center/cover,var(--glass);border:1px solid var(--edge);
+  box-shadow:inset 0 1px 0 var(--hi);
+  transition:box-shadow .3s,border-color .3s,transform .3s}
+.tile::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.22),transparent 38%)}
+.tile.w2{grid-column:span 2;aspect-ratio:2/1}
+.tile:hover,.tile:focus-visible{border-color:var(--glow);transform:translateY(-2px);
+  box-shadow:0 0 0 1px var(--glow),0 0 30px 3px var(--glow-soft),inset 0 1px 0 var(--hi)}
+.cap{position:relative;margin:8px;padding:9px 12px;width:calc(100% - 16px);border-radius:14px;
+  background:var(--glass);border:1px solid var(--edge);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%)}
+.cap b{display:block;font-weight:600;line-height:1.2}
+.cap small{display:block;margin-top:2px;color:var(--muted);font-size:.8rem}
+
+/* ---------- Wider screens ---------- */
+@media (min-width:600px){.grid{grid-template-columns:repeat(3,1fr)}.tile.w2{grid-column:span 2}}
+@media (min-width:900px){
+  .wrap{grid-template-columns:300px 1fr;gap:24px;align-items:start}
+  .profile{position:sticky;top:16px;padding:26px 22px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}.tile:hover{transform:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <button class="set-btn glass" id="setBtn" aria-expanded="false" aria-controls="setPop" data-i="settings">Settings</button>
+  <div class="set-pop glass" id="setPop" hidden>
+    <div><p data-i="theme">Theme</p>
+      <div class="seg"><button data-theme-set="dark" data-i="dark">Dark</button><button data-theme-set="light" data-i="light">Light</button></div></div>
+    <div><p data-i="language">Language</p>
+      <div class="seg"><button data-lang-set="es">ESP</button><button data-lang-set="en">ENG</button></div></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside class="profile glass">
+    <!-- Reemplazá la inicial por tu foto: poné style="background-image:url(img/roland.webp)" y borrá la letra -->
+    <div class="avatar" role="img" aria-label="Roland">R</div>
+    <h1>Roland</h1>
+    <p class="bio" data-i="bio"></p>
+    <nav class="soc" aria-label="Social">
+      <!-- Cambiá los href por tus links reales -->
+      <a href="#" data-i="github">GitHub</a>
+      <a href="#">Ko-fi</a>
+      <a href="#">Workana</a>
+      <a href="#">LinkedIn</a>
+    </nav>
+  </aside>
+
+  <main>
+    <!-- Cada pestaña filtra las novedades. Más adelante pueden ser links a páginas propias (href="design.html", etc.) -->
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="head"><h2 data-i="news">News</h2></div>
+    <section class="grid" id="grid" aria-live="polite"></section>
+  </main>
+</div>
+
+<script>
+/* ---------- Textos ES/EN ---------- */
+const T={
+  en:{settings:"Settings",theme:"Theme",language:"Language",dark:"Dark",light:"Light",news:"News",
+      bio:"Data and design for 20+ years. New chapter, new home base: everything I make lives here.",
+      github:"GitHub",empty:"Nothing here yet.",
+      tabs:{all:"All",design:"Design",data:"Data Analysis",projects:"Projects",about:"About"}},
+  es:{settings:"Ajustes",theme:"Tema",language:"Idioma",dark:"Oscuro",light:"Claro",news:"Novedades",
+      bio:"Datos y diseño hace más de 20 años. Nueva etapa, nuevo núcleo: acá vive todo lo que hago.",
+      github:"GitHub",empty:"Todavía no hay nada acá.",
+      tabs:{all:"Todo",design:"Diseño",data:"Análisis de datos",projects:"Proyectos",about:"Sobre mí"}}
+};
+
+/* ---------- Novedades: una entrada por bloque. Contenido de ejemplo ----------
+   img: cualquier valor CSS de fondo. Para tus dibujos: "url(img/bosque.webp)" (WebP, ~100-150 KB) */
+const NEWS=[
+  {cat:"about",   date:"2026-10-26",wide:true, href:"#",img:"linear-gradient(135deg,#0f6f77,#3ee6d0 60%,#9ff7ea)",
+    t:{en:["Welcome","This page is the home base."],es:["Bienvenida","Esta página es el núcleo."]}},
+  {cat:"projects",date:"2026-10-25",href:"#",img:"linear-gradient(160deg,#17486b,#3ee6d0)",
+    t:{en:["Hi-5 Man","Small tasks, five dollars."],es:["Hi-5 Man","Tareas chicas, cinco dólares."]}},
+  {cat:"design",  date:"2026-10-24",href:"#",img:"linear-gradient(200deg,#5b3d8f,#3ee6d0 90%)",
+    t:{en:["Forest characters","First sketches."],es:["Personajes del bosque","Primeros bocetos."]}},
+  {cat:"data",    date:"2026-10-23",href:"#",img:"linear-gradient(120deg,#0b3b4a,#2fb7c9)",
+    t:{en:["Inventory workbook","Excel, built to last."],es:["Planilla de inventario","Excel, hecha para durar."]}},
+  {cat:"projects",date:"2026-10-22",wide:true,href:"#",img:"linear-gradient(110deg,#103a3f,#3ee6d0 75%,#c9fff7)",
+    t:{en:["The No Fluff Magazine","Issue zero in progress."],es:["The No Fluff Magazine","Número cero en preparación."]}},
+  {cat:"data",    date:"2026-10-21",href:"#",img:"linear-gradient(180deg,#1b5e8a,#7bf1e1)",
+    t:{en:["Data cleaning notebook","Python and SQL."],es:["Cuaderno de limpieza de datos","Python y SQL."]}}
+];
+
+/* ---------- Estado: tema e idioma (por defecto, los del navegador) ---------- */
+const root=document.documentElement;
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let lang=store.get("lang")||((navigator.language||"en").toLowerCase().startsWith("es")?"es":"en");
+let theme=store.get("theme")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");
+let filter="all";
+
+function render(){
+  const t=T[lang];
+  root.lang=lang; root.dataset.theme=theme;
+  document.querySelectorAll("[data-i]").forEach(el=>el.textContent=t[el.dataset.i]);
+  document.querySelectorAll("[data-theme-set]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.themeSet===theme));
+  document.querySelectorAll("[data-lang-set]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.langSet===lang));
+  document.getElementById("tabs").innerHTML=Object.keys(t.tabs).map(k=>
+    `<button class="tab" role="tab" data-f="${k}" aria-selected="${k===filter}">${t.tabs[k]}</button>`).join("");
+  const fmt=new Intl.DateTimeFormat(lang,{day:"numeric",month:"short"});
+  const items=NEWS.filter(n=>filter==="all"||n.cat===filter).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById("grid").innerHTML=items.length?items.map(n=>{
+    const [title,sub]=n.t[lang];
+    return `<a class="tile${n.wide?" w2":""}" href="${n.href}" style="--img:${n.img}">
+      <span class="cap"><b>${title}</b><small>${sub} ${fmt.format(new Date(n.date+"T12:00"))}</small></span></a>`;
+  }).join(""):`<p class="empty glass">${t.empty}</p>`;
+}
+
+/* ---------- Eventos ---------- */
+document.addEventListener("click",e=>{
+  const pop=document.getElementById("setPop"),btn=document.getElementById("setBtn");
+  if(btn.contains(e.target)){const o=pop.hidden;pop.hidden=!o;btn.setAttribute("aria-expanded",o);return}
+  if(!pop.contains(e.target)){pop.hidden=true;btn.setAttribute("aria-expanded","false")}
+  const th=e.target.closest("[data-theme-set]"),lg=e.target.closest("[data-lang-set]"),tb=e.target.closest(".tab");
+  if(th){theme=th.dataset.themeSet;store.set("theme",theme)}
+  if(lg){lang=lg.dataset.langSet;store.set("lang",lang)}
+  if(tb){filter=tb.dataset.f}
+  if(th||lg||tb)render();
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){const p=document.getElementById("setPop");p.hidden=true;document.getElementById("setBtn").setAttribute("aria-expanded","false")}});
+render();
+</script>
+</body>
+</html>
